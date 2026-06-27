@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wards - Hospital MS</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(180deg,#0a1628 0%,#0d2347 50%,#1a3a6b 100%); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+    .logo-box { width: 45px; height: 45px; background: linear-gradient(135deg,#1565c0,#0d47a1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; flex-shrink: 0; }
+    .logo-text h2 { color: white; font-size: 16px; font-weight: 700; }
+    .logo-text p { color: rgba(255,255,255,0.4); font-size: 11px; }
+    .sidebar-menu { padding: 15px 0; flex: 1; }
+    .menu-section { padding: 8px 20px 5px; color: rgba(255,255,255,0.3); font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-top: 8px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; transition: all 0.25s; position: relative; margin: 1px 10px; border-radius: 10px; }
+    .menu-item:hover { background: rgba(255,255,255,0.08); color: white; }
+    .menu-item.active { background: linear-gradient(135deg,rgba(21,101,192,0.6),rgba(13,71,161,0.4)); color: white; }
+    .menu-item.active::before { content:''; position:absolute; left:-10px; top:50%; transform:translateY(-50%); width:4px; height:60%; background:#64b5f6; border-radius:0 3px 3px 0; }
+    .menu-item i { width: 22px; font-size: 15px; text-align: center; }
+    .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; }
+    .user-avatar { width: 38px; height: 38px; background: linear-gradient(135deg,#1565c0,#0d47a1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+    .user-info h4 { color: white; font-size: 13px; font-weight: 600; }
+    .user-info p { color: rgba(255,255,255,0.4); font-size: 11px; }
+    .online-dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; margin-left: auto; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: white; padding: 0 30px; height: 65px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 15px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { color: #0d1b40; font-size: 19px; font-weight: 700; }
+    .topbar-left p { color: #888; font-size: 12px; }
+    .btn-logout { background: linear-gradient(135deg,#ffebee,#fce4ec); color: #c62828; border: 1px solid #ffcdd2; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .btn-logout:hover { background: #c62828; color: white; }
+    .page-body { padding: 25px 30px; flex: 1; }
+    .mini-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 15px; margin-bottom: 22px; }
+    .ms-card { background: white; border-radius: 12px; padding: 16px 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .ms-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; }
+    .ms-icon.pink { background: linear-gradient(135deg,#880e4f,#ad1457); }
+    .ms-icon.green { background: linear-gradient(135deg,#2e7d32,#388e3c); }
+    .ms-icon.orange { background: linear-gradient(135deg,#e65100,#f57c00); }
+    .ms-icon.blue { background: linear-gradient(135deg,#1565c0,#1976d2); }
+    .ms-info h3 { font-size: 20px; font-weight: 700; color: #0d1b40; }
+    .ms-info p { font-size: 11px; color: #888; }
+    .controls { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 22px; display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-wrap: wrap; }
+    .search-wrap { flex: 1; min-width: 200px; position: relative; }
+    .search-wrap i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 14px; }
+    .search-wrap input { width: 100%; padding: 10px 14px 10px 38px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; transition: all 0.2s; }
+    .search-wrap input:focus { outline: none; border-color: #880e4f; background: white; }
+    .filter-select { padding: 10px 14px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; color: #333; }
+    .btn-add { background: linear-gradient(135deg,#880e4f,#ad1457); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s; white-space: nowrap; }
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136,14,79,0.4); }
+    .wards-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+    .ward-card { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; }
+    .ward-card:hover { transform: translateY(-5px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+    .ward-top { padding: 20px; color: white; position: relative; overflow: hidden; }
+    .ward-top::after { content:''; position:absolute; right:-20px; top:-20px; width:100px; height:100px; background:rgba(255,255,255,0.08); border-radius:50%; }
+    .ward-top::before { content:''; position:absolute; right:30px; bottom:-30px; width:80px; height:80px; background:rgba(255,255,255,0.05); border-radius:50%; }
+    .ward-type-badge { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+    .ward-name { font-size: 18px; font-weight: 700; margin-bottom: 5px; }
+    .ward-floor { font-size: 12px; opacity: 0.7; }
+    .ward-body { padding: 18px 20px; }
+    .beds-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 15px; }
+    .bed-stat { text-align: center; background: #f8fafc; border-radius: 10px; padding: 12px 8px; }
+    .bed-stat h4 { font-size: 22px; font-weight: 700; }
+    .bed-stat p { font-size: 10px; color: #888; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .bed-stat.total h4 { color: #0d1b40; }
+    .bed-stat.available h4 { color: #2e7d32; }
+    .bed-stat.occupied h4 { color: #e65100; }
+    .occupancy-wrap { margin-bottom: 15px; }
+    .occupancy-wrap p { font-size: 12px; color: #888; margin-bottom: 6px; display: flex; justify-content: space-between; }
+    .occ-bar { height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden; }
+    .occ-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .ward-actions { display: flex; gap: 8px; }
+    .btn-edit { flex: 1; background: #fce4ec; color: #880e4f; border: none; padding: 9px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+    .btn-del { flex: 1; background: #ffebee; color: #c62828; border: none; padding: 9px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+    .btn-edit:hover { background: #880e4f; color: white; }
+    .btn-del:hover { background: #c62828; color: white; }
+    .empty-state { text-align: center; padding: 60px; color: #bbb; grid-column: 1/-1; }
+    .empty-state i { font-size: 55px; display: block; margin-bottom: 15px; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .overlay.show { display: flex; }
+    .modal { background: white; border-radius: 18px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; animation: popIn 0.3s ease; }
+    @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-header { padding: 22px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 1; border-radius: 18px 18px 0 0; }
+    .modal-header h3 { color: #0d1b40; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .modal-header h3 i { color: #880e4f; }
+    .close-btn { background: #f0f4f8; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; color: #666; display: flex; align-items: center; justify-content: center; }
+    .close-btn:hover { background: #ffebee; color: #c62828; }
+    .modal-body { padding: 22px 25px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select { width: 100%; padding: 11px 14px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; transition: all 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #880e4f; background: white; box-shadow: 0 0 0 4px rgba(136,14,79,0.08); }
+    .form-divider { font-size: 12px; font-weight: 700; color: #880e4f; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #fce4ec; display: flex; align-items: center; gap: 8px; }
+    .modal-footer { padding: 18px 25px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel { background: #f0f4f8; color: #555; border: none; padding: 11px 22px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .btn-save { background: linear-gradient(135deg,#880e4f,#ad1457); color: white; border: none; padding: 11px 25px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-box"><i class="fas fa-hospital-alt"></i></div>
+    <div class="logo-text"><h2>Hospital MS</h2><p>Management System</p></div>
+  </div>
+  <div class="sidebar-menu">
+    <div class="menu-section">Main Menu</div>
+    <a class="menu-item" href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a class="menu-item" href="patients.html"><i class="fas fa-user-injured"></i> Patients</a>
+    <a class="menu-item" href="doctors.html"><i class="fas fa-user-md"></i> Doctors</a>
+    <a class="menu-item" href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a>
+    <div class="menu-section">Management</div>
+    <a class="menu-item" href="billing.html"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
+    <a class="menu-item" href="pharmacy.html"><i class="fas fa-pills"></i> Pharmacy</a>
+    <a class="menu-item" href="laboratory.html"><i class="fas fa-flask"></i> Laboratory</a>
+    <a class="menu-item active" href="wards.html"><i class="fas fa-bed"></i> Wards</a>
+    <a class="menu-item" href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+      <div class="user-info"><h4 id="sidebarName">Admin</h4><p id="sidebarRole">Administrator</p></div>
+      <div class="online-dot"></div>
+    </div>
+  </div>
+</div>
+<div class="main-content">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1><i class="fas fa-bed" style="color:#880e4f"></i> Ward Management</h1>
+      <p>Manage hospital wards and bed allocation</p>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+  <div class="page-body">
+    <div class="mini-stats">
+      <div class="ms-card"><div class="ms-icon pink"><i class="fas fa-door-open"></i></div><div class="ms-info"><h3 id="statWards">0</h3><p>Total Wards</p></div></div>
+      <div class="ms-card"><div class="ms-icon blue"><i class="fas fa-bed"></i></div><div class="ms-info"><h3 id="statTotalBeds">0</h3><p>Total Beds</p></div></div>
+      <div class="ms-card"><div class="ms-icon green"><i class="fas fa-check-circle"></i></div><div class="ms-info"><h3 id="statAvailable">0</h3><p>Available</p></div></div>
+      <div class="ms-card"><div class="ms-icon orange"><i class="fas fa-user-check"></i></div><div class="ms-info"><h3 id="statOccupied">0</h3><p>Occupied</p></div></div>
+    </div>
+    <div class="controls">
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search wards..." oninput="filterWards()">
+      </div>
+      <select class="filter-select" id="typeFilter" onchange="filterWards()">
+        <option value="">All Types</option>
+        <option>General</option><option>ICU</option>
+        <option>Emergency</option><option>Maternity</option>
+        <option>Pediatric</option><option>Surgical</option>
+        <option>Cardiac</option><option>Oncology</option>
+      </select>
+      <button class="btn-add" onclick="openAdd()"><i class="fas fa-plus"></i> Add Ward</button>
+    </div>
+    <div class="wards-grid" id="wardsGrid">
+      <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM MODAL -->
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-bed"></i> <span id="modalTitle">Add New Ward</span></h3>
+      <button class="close-btn" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editIdx">
+      <div class="form-divider"><i class="fas fa-info-circle"></i> Ward Details</div>
+      <div class="form-row">
+        <div class="form-group"><label>Ward Name *</label><input type="text" id="fName" placeholder="e.g. General Ward A"></div>
+        <div class="form-group">
+          <label>Ward Type *</label>
+          <select id="fType">
+            <option value="">Select type</option>
+            <option>General</option><option>ICU</option>
+            <option>Emergency</option><option>Maternity</option>
+            <option>Pediatric</option><option>Surgical</option>
+            <option>Cardiac</option><option>Oncology</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Floor / Location</label><input type="text" id="fFloor" placeholder="e.g. Ground Floor, Block A"></div>
+        <div class="form-group"><label>Ward In-Charge</label><input type="text" id="fInCharge" placeholder="Doctor/Nurse name"></div>
+      </div>
+      <div class="form-divider"><i class="fas fa-bed"></i> Bed Management</div>
+      <div class="form-row">
+        <div class="form-group"><label>Total Beds *</label><input type="number" id="fTotal" placeholder="Total number of beds" min="1"></div>
+        <div class="form-group"><label>Currently Occupied</label><input type="number" id="fOccupied" placeholder="Occupied beds" value="0" min="0"></div>
+      </div>
+      <div class="form-divider"><i class="fas fa-dollar-sign"></i> Pricing</div>
+      <div class="form-row">
+        <div class="form-group"><label>Daily Rate (PKR)</label><input type="number" id="fRate" placeholder="Per day charge"></div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="fStatus">
+            <option value="Active">Active</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Closed">Closed</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Notes</label><input type="text" id="fNotes" placeholder="Additional notes"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveWard()"><i class="fas fa-save"></i> Save Ward</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const STORE_KEY = 'wards_v2';
+  const typeColors = {
+    'General':'#880e4f','ICU':'#b71c1c','Emergency':'#e65100',
+    'Maternity':'#4a148c','Pediatric':'#1565c0','Surgical':'#004d40',
+    'Cardiac':'#880e4f','Oncology':'#006064'
+  };
+  let allWards = [];
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) window.location.href = '../index.html';
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarRole').textContent = user.role;
+
+  function loadWards() {
+    allWards = JSON.parse(localStorage.getItem(STORE_KEY) || '[]');
+    renderCards(allWards);
+    updateStats(allWards);
+  }
+
+  function updateStats(list) {
+    document.getElementById('statWards').textContent = list.length;
+    const totalBeds = list.reduce((s,w)=>s+parseInt(w.total||0),0);
+    const occupied = list.reduce((s,w)=>s+parseInt(w.occupied||0),0);
+    document.getElementById('statTotalBeds').textContent = totalBeds;
+    document.getElementById('statAvailable').textContent = totalBeds - occupied;
+    document.getElementById('statOccupied').textContent = occupied;
+  }
+
+  function renderCards(list) {
+    const grid = document.getElementById('wardsGrid');
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty-state"><i class="fas fa-bed"></i><p>No wards found. Click "Add Ward" to get started!</p></div>';
+      return;
+    }
+    grid.innerHTML = list.map((w,i) => {
+      const color = typeColors[w.type] || '#880e4f';
+      const total = parseInt(w.total||0);
+      const occupied = parseInt(w.occupied||0);
+      const available = total - occupied;
+      const pct = total > 0 ? Math.round((occupied/total)*100) : 0;
+      const fillColor = pct>=90?'#c62828':pct>=70?'#e65100':'#2e7d32';
+      return `
+        <div class="ward-card">
+          <div class="ward-top" style="background:linear-gradient(135deg,${color},${color}bb)">
+            <div class="ward-type-badge"><i class="fas fa-tag"></i> ${w.type}</div>
+            <div class="ward-name">${w.name}</div>
+            <div class="ward-floor"><i class="fas fa-map-marker-alt"></i> ${w.floor||'N/A'} ${w.inCharge?'• Dr/N. '+w.inCharge:''}</div>
+          </div>
+          <div class="ward-body">
+            <div class="beds-row">
+              <div class="bed-stat total"><h4>${total}</h4><p>Total</p></div>
+              <div class="bed-stat available"><h4>${available}</h4><p>Free</p></div>
+              <div class="bed-stat occupied"><h4>${occupied}</h4><p>Occupied</p></div>
+            </div>
+            <div class="occupancy-wrap">
+              <p><span>Occupancy Rate</span><strong style="color:${fillColor}">${pct}%</strong></p>
+              <div class="occ-bar"><div class="occ-fill" style="width:${pct}%;background:${fillColor}"></div></div>
+            </div>
+            ${w.rate?`<div style="display:flex;justify-content:space-between;font-size:13px;color:#555;padding:8px 0;border-top:1px solid #f5f5f5;margin-bottom:10px"><span>Daily Rate</span><strong>PKR ${parseInt(w.rate).toLocaleString()}</strong></div>`:''}
+            ${w.status&&w.status!=='Active'?`<div style="background:#ffebee;color:#c62828;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-bottom:10px">⚠️ ${w.status}</div>`:''}
+            <div class="ward-actions">
+              <button class="btn-edit" onclick="editWard(${i})"><i class="fas fa-edit"></i> Edit</button>
+              <button class="btn-del" onclick="deleteWard(${i})"><i class="fas fa-trash"></i> Delete</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function filterWards() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const t = document.getElementById('typeFilter').value;
+    const filtered = allWards.filter(w=>
+      (!q||w.name.toLowerCase().includes(q))&&(!t||w.type===t));
+    renderCards(filtered);
+    updateStats(filtered);
+  }
+
+  function openAdd() {
+    document.getElementById('modalTitle').textContent = 'Add New Ward';
+    document.getElementById('editIdx').value = '';
+    ['fName','fFloor','fInCharge','fTotal','fRate','fNotes'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('fOccupied').value = '0';
+    document.getElementById('fType').value = '';
+    document.getElementById('fStatus').value = 'Active';
+    document.getElementById('formOverlay').classList.add('show');
+  }
+
+  function editWard(i) {
+    const w = allWards[i];
+    document.getElementById('modalTitle').textContent = 'Edit Ward';
+    document.getElementById('editIdx').value = i;
+    document.getElementById('fName').value = w.name;
+    document.getElementById('fType').value = w.type;
+    document.getElementById('fFloor').value = w.floor||'';
+    document.getElementById('fInCharge').value = w.inCharge||'';
+    document.getElementById('fTotal').value = w.total;
+    document.getElementById('fOccupied').value = w.occupied||0;
+    document.getElementById('fRate').value = w.rate||'';
+    document.getElementById('fStatus').value = w.status||'Active';
+    document.getElementById('fNotes').value = w.notes||'';
+    document.getElementById('formOverlay').classList.add('show');
+  }
+
+  function closeModal() { document.getElementById('formOverlay').classList.remove('show'); }
+
+  function saveWard() {
+    const idx = document.getElementById('editIdx').value;
+    const total = parseInt(document.getElementById('fTotal').value)||0;
+    const occupied = parseInt(document.getElementById('fOccupied').value)||0;
+    if (occupied > total) { alert('Occupied beds cannot exceed total beds!'); return; }
+    const ward = {
+      name: document.getElementById('fName').value.trim(),
+      type: document.getElementById('fType').value,
+      floor: document.getElementById('fFloor').value,
+      inCharge: document.getElementById('fInCharge').value,
+      total: total,
+      occupied: occupied,
+      rate: document.getElementById('fRate').value,
+      status: document.getElementById('fStatus').value,
+      notes: document.getElementById('fNotes').value
+    };
+    if (!ward.name||!ward.type||!ward.total) { alert('Please fill required (*) fields!'); return; }
+    if (idx!=='') allWards[idx] = ward;
+    else allWards.push(ward);
+    localStorage.setItem(STORE_KEY, JSON.stringify(allWards));
+    closeModal();
+    loadWards();
+  }
+
+  function deleteWard(i) {
+    if (!confirm('Delete this ward?')) return;
+    allWards.splice(i,1);
+    localStorage.setItem(STORE_KEY, JSON.stringify(allWards));
+    loadWards();
+  }
+
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+  loadWards();
+</script>
+</body>
+</html>

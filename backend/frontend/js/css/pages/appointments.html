@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Appointments - Hospital MS</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(180deg,#0a1628 0%,#0d2347 50%,#1a3a6b 100%); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+    .logo-box { width: 45px; height: 45px; background: linear-gradient(135deg,#1565c0,#0d47a1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; flex-shrink: 0; }
+    .logo-text h2 { color: white; font-size: 16px; font-weight: 700; }
+    .logo-text p { color: rgba(255,255,255,0.4); font-size: 11px; }
+    .sidebar-menu { padding: 15px 0; flex: 1; }
+    .menu-section { padding: 8px 20px 5px; color: rgba(255,255,255,0.3); font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-top: 8px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; transition: all 0.25s; position: relative; margin: 1px 10px; border-radius: 10px; }
+    .menu-item:hover { background: rgba(255,255,255,0.08); color: white; }
+    .menu-item.active { background: linear-gradient(135deg,rgba(21,101,192,0.6),rgba(13,71,161,0.4)); color: white; }
+    .menu-item.active::before { content:''; position:absolute; left:-10px; top:50%; transform:translateY(-50%); width:4px; height:60%; background:#64b5f6; border-radius:0 3px 3px 0; }
+    .menu-item i { width: 22px; font-size: 15px; text-align: center; }
+    .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; }
+    .user-avatar { width: 38px; height: 38px; background: linear-gradient(135deg,#1565c0,#0d47a1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+    .user-info h4 { color: white; font-size: 13px; font-weight: 600; }
+    .user-info p { color: rgba(255,255,255,0.4); font-size: 11px; }
+    .online-dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; margin-left: auto; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: white; padding: 0 30px; height: 65px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 15px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { color: #0d1b40; font-size: 19px; font-weight: 700; }
+    .topbar-left p { color: #888; font-size: 12px; }
+    .btn-logout { background: linear-gradient(135deg,#ffebee,#fce4ec); color: #c62828; border: 1px solid #ffcdd2; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .btn-logout:hover { background: #c62828; color: white; }
+    .page-body { padding: 25px 30px; flex: 1; }
+
+    .mini-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 15px; margin-bottom: 22px; }
+    .ms-card { background: white; border-radius: 12px; padding: 16px 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .ms-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; }
+    .ms-icon.blue { background: linear-gradient(135deg,#1565c0,#1976d2); }
+    .ms-icon.orange { background: linear-gradient(135deg,#e65100,#f57c00); }
+    .ms-icon.green { background: linear-gradient(135deg,#2e7d32,#388e3c); }
+    .ms-icon.red { background: linear-gradient(135deg,#c62828,#e53935); }
+    .ms-info h3 { font-size: 20px; font-weight: 700; color: #0d1b40; }
+    .ms-info p { font-size: 11px; color: #888; }
+
+    .controls { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-wrap: wrap; }
+    .search-wrap { flex: 1; min-width: 200px; position: relative; }
+    .search-wrap i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 14px; }
+    .search-wrap input { width: 100%; padding: 10px 14px 10px 38px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; transition: all 0.2s; }
+    .search-wrap input:focus { outline: none; border-color: #e65100; background: white; }
+    .filter-select { padding: 10px 14px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; color: #333; }
+    .btn-add { background: linear-gradient(135deg,#e65100,#f57c00); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s; white-space: nowrap; }
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230,81,0,0.4); }
+
+    .table-wrap { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.05); overflow: hidden; }
+    .table-head-bar { padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f0f0; }
+    .table-head-bar h3 { color: #0d1b40; font-size: 15px; font-weight: 700; }
+    .table-head-bar span { color: #888; font-size: 13px; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: #f8fafc; }
+    thead th { padding: 12px 16px; text-align: left; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; border-bottom: 2px solid #f0f0f0; }
+    tbody tr { transition: background 0.15s; border-bottom: 1px solid #f8f8f8; }
+    tbody tr:hover { background: #fffaf5; }
+    tbody td { padding: 14px 16px; font-size: 13px; color: #333; vertical-align: middle; }
+
+    .appt-cell { display: flex; align-items: center; gap: 10px; }
+    .appt-avatar { width: 34px; height: 34px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; color: white; flex-shrink: 0; }
+
+    .badge { padding: 4px 11px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .badge-pending { background: #fff3e0; color: #e65100; }
+    .badge-confirmed { background: #e8f5e9; color: #2e7d32; }
+    .badge-completed { background: #e3f2fd; color: #1565c0; }
+    .badge-cancelled { background: #ffebee; color: #c62828; }
+
+    .action-btns { display: flex; gap: 6px; }
+    .btn-view { background: #e3f2fd; color: #1565c0; border: none; padding: 6px 11px; border-radius: 7px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+    .btn-edit { background: #e8f5e9; color: #2e7d32; border: none; padding: 6px 11px; border-radius: 7px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+    .btn-del { background: #ffebee; color: #c62828; border: none; padding: 6px 11px; border-radius: 7px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+    .btn-view:hover { background: #1565c0; color: white; }
+    .btn-edit:hover { background: #2e7d32; color: white; }
+    .btn-del:hover { background: #c62828; color: white; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #bbb; }
+    .empty-state i { font-size: 55px; display: block; margin-bottom: 15px; }
+
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .overlay.show { display: flex; }
+    .modal { background: white; border-radius: 18px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; animation: popIn 0.3s ease; }
+    @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-header { padding: 22px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 1; border-radius: 18px 18px 0 0; }
+    .modal-header h3 { color: #0d1b40; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .modal-header h3 i { color: #e65100; }
+    .close-btn { background: #f0f4f8; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; color: #666; display: flex; align-items: center; justify-content: center; }
+    .close-btn:hover { background: #ffebee; color: #c62828; }
+    .modal-body { padding: 22px 25px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 11px 14px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; transition: all 0.2s; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #e65100; background: white; box-shadow: 0 0 0 4px rgba(230,81,0,0.08); }
+    .form-divider { font-size: 12px; font-weight: 700; color: #e65100; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #fff3e0; display: flex; align-items: center; gap: 8px; }
+    .modal-footer { padding: 18px 25px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel { background: #f0f4f8; color: #555; border: none; padding: 11px 22px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .btn-save { background: linear-gradient(135deg,#e65100,#f57c00); color: white; border: none; padding: 11px 25px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; }
+    .view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .view-item { background: #f8fafc; border-radius: 10px; padding: 12px 15px; }
+    .view-item .vi-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600; }
+    .view-item .vi-value { font-size: 14px; color: #0d1b40; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-box"><i class="fas fa-hospital-alt"></i></div>
+    <div class="logo-text"><h2>Hospital MS</h2><p>Management System</p></div>
+  </div>
+  <div class="sidebar-menu">
+    <div class="menu-section">Main Menu</div>
+    <a class="menu-item" href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a class="menu-item" href="patients.html"><i class="fas fa-user-injured"></i> Patients</a>
+    <a class="menu-item" href="doctors.html"><i class="fas fa-user-md"></i> Doctors</a>
+    <a class="menu-item active" href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a>
+    <div class="menu-section">Management</div>
+    <a class="menu-item" href="billing.html"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
+    <a class="menu-item" href="pharmacy.html"><i class="fas fa-pills"></i> Pharmacy</a>
+    <a class="menu-item" href="laboratory.html"><i class="fas fa-flask"></i> Laboratory</a>
+    <a class="menu-item" href="wards.html"><i class="fas fa-bed"></i> Wards</a>
+    <a class="menu-item" href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+      <div class="user-info"><h4 id="sidebarName">Admin</h4><p id="sidebarRole">Administrator</p></div>
+      <div class="online-dot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1><i class="fas fa-calendar-check" style="color:#e65100"></i> Appointment Management</h1>
+      <p>Manage all hospital appointments</p>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <div class="page-body">
+    <div class="mini-stats">
+      <div class="ms-card"><div class="ms-icon blue"><i class="fas fa-calendar"></i></div><div class="ms-info"><h3 id="statTotal">0</h3><p>Total</p></div></div>
+      <div class="ms-card"><div class="ms-icon orange"><i class="fas fa-clock"></i></div><div class="ms-info"><h3 id="statPending">0</h3><p>Pending</p></div></div>
+      <div class="ms-card"><div class="ms-icon green"><i class="fas fa-check-circle"></i></div><div class="ms-info"><h3 id="statDone">0</h3><p>Completed</p></div></div>
+      <div class="ms-card"><div class="ms-icon red"><i class="fas fa-times-circle"></i></div><div class="ms-info"><h3 id="statCancelled">0</h3><p>Cancelled</p></div></div>
+    </div>
+
+    <div class="controls">
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by patient, doctor..." oninput="filterAppts()">
+      </div>
+      <select class="filter-select" id="statusFilter" onchange="filterAppts()">
+        <option value="">All Status</option>
+        <option value="Pending">Pending</option>
+        <option value="Confirmed">Confirmed</option>
+        <option value="Completed">Completed</option>
+        <option value="Cancelled">Cancelled</option>
+      </select>
+      <button class="btn-add" onclick="openAdd()"><i class="fas fa-plus"></i> Book Appointment</button>
+    </div>
+
+    <div class="table-wrap">
+      <div class="table-head-bar">
+        <h3><i class="fas fa-list" style="color:#e65100"></i> All Appointments</h3>
+        <span id="countLabel">Loading...</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Reason</th>
+            <th>Fee</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="apptTbody">
+          <tr><td colspan="9"><div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- FORM MODAL -->
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-calendar-plus"></i> <span id="modalTitle">Book Appointment</span></h3>
+      <button class="close-btn" onclick="closeModal('formOverlay')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-divider"><i class="fas fa-users"></i> Patient & Doctor</div>
+      <div class="form-row">
+        <div class="form-group"><label>Select Patient *</label><select id="fPatient"></select></div>
+        <div class="form-group"><label>Select Doctor *</label><select id="fDoctor"></select></div>
+      </div>
+      <div class="form-divider"><i class="fas fa-clock"></i> Schedule</div>
+      <div class="form-row">
+        <div class="form-group"><label>Date *</label><input type="date" id="fDate"></div>
+        <div class="form-group"><label>Time *</label><input type="time" id="fTime"></div>
+      </div>
+      <div class="form-divider"><i class="fas fa-info-circle"></i> Details</div>
+      <div class="form-row">
+        <div class="form-group"><label>Status</label>
+          <select id="fStatus">
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Completed">Completed</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Fee (PKR)</label><input type="number" id="fFee" placeholder="Consultation fee"></div>
+      </div>
+      <div class="form-group"><label>Reason for Visit</label><input type="text" id="fReason" placeholder="Reason for appointment"></div>
+      <div class="form-group"><label>Notes</label><textarea id="fNotes" placeholder="Additional notes..." rows="3"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('formOverlay')">Cancel</button>
+      <button class="btn-save" onclick="saveAppt()"><i class="fas fa-save"></i> Save Appointment</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="overlay" id="viewOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-eye" style="color:#e65100"></i> Appointment Details</h3>
+      <button class="close-btn" onclick="closeModal('viewOverlay')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="viewBody"></div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('viewOverlay')">Close</button></div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:5000/api/appointments';
+  let allAppts = [];
+  const colors = ['#e65100','#1565c0','#2e7d32','#4a148c','#880e4f','#006064'];
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) window.location.href = '../index.html';
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarRole').textContent = user.role;
+
+  async function loadAppts() {
+    try {
+      const res = await fetch(`${API}/all`);
+      allAppts = await res.json();
+      renderTable(allAppts);
+      updateStats(allAppts);
+    } catch(e) {
+      document.getElementById('apptTbody').innerHTML =
+        '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-exclamation-circle" style="color:#e53935"></i><p>Cannot connect to server!</p></div></td></tr>';
+    }
+  }
+
+  function updateStats(list) {
+    document.getElementById('statTotal').textContent = list.length;
+    document.getElementById('statPending').textContent = list.filter(a=>a.status==='Pending').length;
+    document.getElementById('statDone').textContent = list.filter(a=>a.status==='Completed').length;
+    document.getElementById('statCancelled').textContent = list.filter(a=>a.status==='Cancelled').length;
+    document.getElementById('countLabel').textContent = `${list.length} appointment${list.length!==1?'s':''}`;
+  }
+
+  function renderTable(list) {
+    const tbody = document.getElementById('apptTbody');
+    if (!list.length) {
+      tbody.innerHTML = '<tr><td colspan="9"><div class="empty-state"><i class="fas fa-calendar-times"></i><p>No appointments found</p></div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = list.map((a, i) => {
+      const color = colors[i % colors.length];
+      const pName = a.patient?.name || 'N/A';
+      const dName = a.doctor?.name || 'N/A';
+      const date = a.appointmentDate ? new Date(a.appointmentDate).toLocaleDateString() : '—';
+      return `
+        <tr>
+          <td style="color:#aaa;font-size:12px">${i+1}</td>
+          <td>
+            <div class="appt-cell">
+              <div class="appt-avatar" style="background:${color}">${pName[0]}</div>
+              <strong>${pName}</strong>
+            </div>
+          </td>
+          <td>${dName}</td>
+          <td>${date}</td>
+          <td><i class="fas fa-clock" style="color:#e65100;font-size:11px"></i> ${a.appointmentTime||'—'}</td>
+          <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.reason||'—'}</td>
+          <td>${a.fee ? 'PKR '+parseInt(a.fee).toLocaleString() : '—'}</td>
+          <td><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-view" onclick="viewAppt('${a._id}')"><i class="fas fa-eye"></i></button>
+              <button class="btn-edit" onclick="editAppt('${a._id}')"><i class="fas fa-edit"></i></button>
+              <button class="btn-del" onclick="deleteAppt('${a._id}')"><i class="fas fa-trash"></i></button>
+            </div>
+          </td>
+        </tr>`;
+    }).join('');
+  }
+
+  function filterAppts() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const s = document.getElementById('statusFilter').value;
+    const filtered = allAppts.filter(a =>
+      (!q || (a.patient?.name||'').toLowerCase().includes(q) || (a.doctor?.name||'').toLowerCase().includes(q)) &&
+      (!s || a.status === s)
+    );
+    renderTable(filtered);
+    updateStats(filtered);
+  }
+
+  async function loadDropdowns() {
+    const [patients, doctors] = await Promise.all([
+      fetch('http://localhost:5000/api/patients/all').then(r=>r.json()),
+      fetch('http://localhost:5000/api/doctors/all').then(r=>r.json())
+    ]);
+    document.getElementById('fPatient').innerHTML = patients.map(p=>`<option value="${p._id}">${p.name}</option>`).join('');
+    document.getElementById('fDoctor').innerHTML = doctors.map(d=>`<option value="${d._id}">${d.name} — ${d.specialization}</option>`).join('');
+  }
+
+  function openAdd() {
+    document.getElementById('modalTitle').textContent = 'Book Appointment';
+    document.getElementById('editId').value = '';
+    document.getElementById('fDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('fTime').value = '';
+    document.getElementById('fStatus').value = 'Pending';
+    document.getElementById('fFee').value = '';
+    document.getElementById('fReason').value = '';
+    document.getElementById('fNotes').value = '';
+    loadDropdowns();
+    document.getElementById('formOverlay').classList.add('show');
+  }
+
+  function editAppt(id) {
+    const a = allAppts.find(x=>x._id===id);
+    document.getElementById('modalTitle').textContent = 'Edit Appointment';
+    document.getElementById('editId').value = a._id;
+    document.getElementById('fDate').value = a.appointmentDate?.split('T')[0] || '';
+    document.getElementById('fTime').value = a.appointmentTime || '';
+    document.getElementById('fStatus').value = a.status;
+    document.getElementById('fFee').value = a.fee || '';
+    document.getElementById('fReason').value = a.reason || '';
+    document.getElementById('fNotes').value = a.notes || '';
+    loadDropdowns().then(() => {
+      if (a.patient?._id) document.getElementById('fPatient').value = a.patient._id;
+      if (a.doctor?._id) document.getElementById('fDoctor').value = a.doctor._id;
+    });
+    document.getElementById('formOverlay').classList.add('show');
+  }
+
+  function viewAppt(id) {
+    const a = allAppts.find(x=>x._id===id);
+    const i = allAppts.indexOf(a);
+    const color = colors[i%colors.length];
+    const date = a.appointmentDate ? new Date(a.appointmentDate).toLocaleDateString() : '—';
+    document.getElementById('viewBody').innerHTML = `
+      <div style="background:linear-gradient(135deg,${color},${color}dd);border-radius:12px;padding:20px;text-align:center;margin-bottom:20px;color:white">
+        <i class="fas fa-calendar-check" style="font-size:35px;margin-bottom:10px;display:block"></i>
+        <h3>${a.patient?.name||'N/A'} → ${a.doctor?.name||'N/A'}</h3>
+        <p style="opacity:0.8;margin-top:5px">${date} at ${a.appointmentTime||'—'}</p>
+      </div>
+      <div class="view-grid">
+        <div class="view-item"><div class="vi-label">Patient</div><div class="vi-value">${a.patient?.name||'—'}</div></div>
+        <div class="view-item"><div class="vi-label">Doctor</div><div class="vi-value">${a.doctor?.name||'—'}</div></div>
+        <div class="view-item"><div class="vi-label">Date</div><div class="vi-value">${date}</div></div>
+        <div class="view-item"><div class="vi-label">Time</div><div class="vi-value">${a.appointmentTime||'—'}</div></div>
+        <div class="view-item"><div class="vi-label">Status</div><div class="vi-value"><span class="badge badge-${a.status.toLowerCase()}">${a.status}</span></div></div>
+        <div class="view-item"><div class="vi-label">Fee</div><div class="vi-value">${a.fee?'PKR '+parseInt(a.fee).toLocaleString():'—'}</div></div>
+        <div class="view-item" style="grid-column:1/-1"><div class="vi-label">Reason</div><div class="vi-value">${a.reason||'—'}</div></div>
+        <div class="view-item" style="grid-column:1/-1"><div class="vi-label">Notes</div><div class="vi-value">${a.notes||'—'}</div></div>
+      </div>`;
+    document.getElementById('viewOverlay').classList.add('show');
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  async function saveAppt() {
+    const id = document.getElementById('editId').value;
+    const data = {
+      patient: document.getElementById('fPatient').value,
+      doctor: document.getElementById('fDoctor').value,
+      appointmentDate: document.getElementById('fDate').value,
+      appointmentTime: document.getElementById('fTime').value,
+      status: document.getElementById('fStatus').value,
+      fee: document.getElementById('fFee').value,
+      reason: document.getElementById('fReason').value,
+      notes: document.getElementById('fNotes').value
+    };
+    if (!data.appointmentDate || !data.appointmentTime) {
+      alert('Please select date and time!'); return;
+    }
+    try {
+      const url = id ? `${API}/${id}` : `${API}/add`;
+      const method = id ? 'PUT' : 'POST';
+      const res = await fetch(url, { method, headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+      if (res.ok) { closeModal('formOverlay'); loadAppts(); }
+      else { const d = await res.json(); alert(d.message||'Error!'); }
+    } catch(e) { alert('Cannot connect to server!'); }
+  }
+
+  async function deleteAppt(id) {
+    if (!confirm('Delete this appointment?')) return;
+    await fetch(`${API}/${id}`, { method:'DELETE' });
+    loadAppts();
+  }
+
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+  loadAppts();
+</script>
+</body>
+</html>

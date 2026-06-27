@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Hospital MS</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+
+    /* ========== SIDEBAR ========== */
+    .sidebar {
+      width: 260px;
+      min-height: 100vh;
+      background: linear-gradient(180deg, #0a1628 0%, #0d2347 50%, #1a3a6b 100%);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 100;
+      transition: all 0.3s;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.3);
+    }
+
+    .sidebar-header {
+      padding: 25px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-box {
+      width: 45px; height: 45px;
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; color: white;
+      box-shadow: 0 4px 15px rgba(21,101,192,0.4);
+      flex-shrink: 0;
+    }
+
+    .logo-text h2 { color: white; font-size: 16px; font-weight: 700; }
+    .logo-text p { color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 2px; }
+
+    .sidebar-menu { padding: 15px 0; flex: 1; overflow-y: auto; }
+
+    .menu-section {
+      padding: 8px 20px 5px;
+      color: rgba(255,255,255,0.3);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 20px;
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      font-size: 13.5px;
+      transition: all 0.25s;
+      position: relative;
+      margin: 1px 10px;
+      border-radius: 10px;
+    }
+
+    .menu-item:hover {
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+
+    .menu-item.active {
+      background: linear-gradient(135deg, rgba(21,101,192,0.6), rgba(13,71,161,0.4));
+      color: white;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .menu-item.active::before {
+      content: '';
+      position: absolute;
+      left: -10px; top: 50%;
+      transform: translateY(-50%);
+      width: 4px; height: 60%;
+      background: #64b5f6;
+      border-radius: 0 3px 3px 0;
+    }
+
+    .menu-item i {
+      width: 22px;
+      font-size: 15px;
+      text-align: center;
+    }
+
+    .menu-badge {
+      margin-left: auto;
+      background: #1565c0;
+      color: white;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .menu-badge.green { background: #2e7d32; }
+    .menu-badge.orange { background: #e65100; }
+
+    .sidebar-footer {
+      padding: 15px 15px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .user-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .user-avatar {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .user-info h4 { color: white; font-size: 13px; font-weight: 600; }
+    .user-info p { color: rgba(255,255,255,0.4); font-size: 11px; margin-top: 1px; }
+
+    .online-dot {
+      width: 8px; height: 8px;
+      background: #4caf50;
+      border-radius: 50%;
+      margin-left: auto;
+      box-shadow: 0 0 6px #4caf50;
+      animation: blink 2s infinite;
+    }
+
+    @keyframes blink {
+      0%,100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* ========== MAIN CONTENT ========== */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ---- TOPBAR ---- */
+    .topbar {
+      background: white;
+      padding: 0 30px;
+      height: 65px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.06);
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .topbar-left h1 {
+      color: #0d1b40;
+      font-size: 19px;
+      font-weight: 700;
+    }
+
+    .topbar-left p {
+      color: #888;
+      font-size: 12px;
+      margin-top: 1px;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topbar-btn {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      border: 1px solid #e8ecf0;
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      color: #555;
+      font-size: 16px;
+      position: relative;
+      transition: all 0.2s;
+    }
+
+    .topbar-btn:hover { background: #f0f4f8; color: #1565c0; }
+
+    .notif-dot {
+      position: absolute;
+      top: 6px; right: 6px;
+      width: 8px; height: 8px;
+      background: #e53935;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    .topbar-date {
+      background: #f0f4f8;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 12px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-logout {
+      background: linear-gradient(135deg, #ffebee, #fce4ec);
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+      padding: 8px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-logout:hover { background: #c62828; color: white; border-color: #c62828; }
+
+    /* ---- DASHBOARD BODY ---- */
+    .dashboard-body { padding: 25px 30px; flex: 1; }
+
+    /* Welcome Banner */
+    .welcome-banner {
+      background: linear-gradient(135deg, #0d47a1 0%, #1565c0 50%, #1976d2 100%);
+      border-radius: 18px;
+      padding: 28px 35px;
+      color: white;
+      margin-bottom: 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-banner::before {
+      content: '';
+      position: absolute;
+      width: 250px; height: 250px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      right: -50px; top: -80px;
+    }
+
+    .welcome-banner::after {
+      content: '';
+      position: absolute;
+      width: 150px; height: 150px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 50%;
+      right: 120px; bottom: -60px;
+    }
+
+    .welcome-text h2 { font-size: 22px; margin-bottom: 6px; }
+    .welcome-text p { opacity: 0.75; font-size: 14px; }
+
+    .welcome-actions { display: flex; gap: 10px; z-index: 1; }
+
+    .wb-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: all 0.2s;
+    }
+
+    .wb-btn.white {
+      background: white;
+      color: #1565c0;
+    }
+
+    .wb-btn.white:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+    .wb-btn.outline {
+      background: rgba(255,255,255,0.15);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .wb-btn.outline:hover { background: rgba(255,255,255,0.25); }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .stat-card {
+      background: white;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .stat-card.blue::after { background: linear-gradient(90deg, #1565c0, #42a5f5); }
+    .stat-card.green::after { background: linear-gradient(90deg, #2e7d32, #66bb6a); }
+    .stat-card.orange::after { background: linear-gradient(90deg, #e65100, #ffa726); }
+    .stat-card.purple::after { background: linear-gradient(90deg, #4a148c, #ab47bc); }
+
+    .stat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+
+    .stat-icon {
+      width: 55px; height: 55px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; color: white;
+      flex-shrink: 0;
+    }
+
+    .stat-icon.blue { background: linear-gradient(135deg, #1565c0, #1976d2); }
+    .stat-icon.green { background: linear-gradient(135deg, #2e7d32, #388e3c); }
+    .stat-icon.orange { background: linear-gradient(135deg, #e65100, #f57c00); }
+    .stat-icon.purple { background: linear-gradient(135deg, #4a148c, #6a1b9a); }
+
+    .stat-info h3 {
+      font-size: 26px;
+      color: #0d1b40;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-info p { color: #888; font-size: 13px; }
+
+    .stat-trend {
+      font-size: 11px;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .stat-trend.up { color: #2e7d32; }
+    .stat-trend.neutral { color: #1565c0; }
+
+    /* Middle Row */
+    .middle-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 14px;
+      padding: 22px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+
+    .card-header h3 {
+      color: #0d1b40;
+      font-size: 15px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-header h3 i { color: #1565c0; }
+
+    .view-all {
+      font-size: 12px;
+      color: #1565c0;
+      text-decoration: none;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .view-all:hover { text-decoration: underline; }
+
+    /* Mini Table */
+    .mini-table { width: 100%; border-collapse: collapse; }
+    .mini-table th {
+      text-align: left;
+      font-size: 11px;
+      color: #aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 10px 10px;
+      font-weight: 600;
+    }
+
+    .mini-table td {
+      padding: 10px;
+      font-size: 13px;
+      color: #333;
+      border-top: 1px solid #f5f5f5;
+    }
+
+    .mini-table tr:hover td { background: #f8f9ff; }
+
+    .avatar-sm {
+      width: 30px; height: 30px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: white;
+      flex-shrink: 0;
+    }
+
+    .name-cell { display: flex; align-items: center; gap: 8px; }
+
+    .badge-sm {
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-confirmed { background: #e8f5e9; color: #2e7d32; }
+    .badge-pending { background: #fff3e0; color: #e65100; }
+    .badge-completed { background: #e3f2fd; color: #1565c0; }
+    .badge-cancelled { background: #ffebee; color: #c62828; }
+
+    /* Quick Stats Side */
+    .quick-stats { display: flex; flex-direction: column; gap: 12px; }
+
+    .qs-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 13px;
+      background: #f8fafc;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .qs-item:hover {
+      background: #e3f2fd;
+      transform: translateX(4px);
+    }
+
+    .qs-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; color: white;
+      flex-shrink: 0;
+    }
+
+    .qs-text h4 { color: #0d1b40; font-size: 13px; font-weight: 600; }
+    .qs-text p { color: #888; font-size: 11px; margin-top: 2px; }
+    .qs-arrow { margin-left: auto; color: #ccc; font-size: 12px; }
+
+    /* Bottom Row */
+    .bottom-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .module-card {
+      background: white;
+      border-radius: 14px;
+      padding: 22px;
+      text-align: center;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: block;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .module-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+    }
+
+    .module-card.mc-red::before { background: linear-gradient(90deg,#b71c1c,#e53935); }
+    .module-card.mc-teal::before { background: linear-gradient(90deg,#004d40,#00897b); }
+    .module-card.mc-pink::before { background: linear-gradient(90deg,#880e4f,#e91e63); }
+    .module-card.mc-cyan::before { background: linear-gradient(90deg,#006064,#0097a7); }
+
+    .module-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .module-icon {
+      width: 60px; height: 60px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px; color: white;
+      margin: 0 auto 14px;
+    }
+
+    .mc-red .module-icon { background: linear-gradient(135deg,#b71c1c,#e53935); }
+    .mc-teal .module-icon { background: linear-gradient(135deg,#004d40,#00897b); }
+    .mc-pink .module-icon { background: linear-gradient(135deg,#880e4f,#e91e63); }
+    .mc-cyan .module-icon { background: linear-gradient(135deg,#006064,#0097a7); }
+
+    .module-card h3 { color: #0d1b40; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .module-card p { color: #888; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+<!-- ========== SIDEBAR ========== -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-box"><i class="fas fa-hospital-alt"></i></div>
+    <div class="logo-text">
+      <h2>Hospital MS</h2>
+      <p>Management System</p>
+    </div>
+  </div>
+
+  <div class="sidebar-menu">
+    <div class="menu-section">Main Menu</div>
+
+    <a class="menu-item active" href="dashboard.html">
+      <i class="fas fa-th-large"></i>
+      Dashboard
+    </a>
+
+    <a class="menu-item" href="patients.html">
+      <i class="fas fa-user-injured"></i>
+      Patients
+      <span class="menu-badge" id="sbPatients">0</span>
+    </a>
+
+    <a class="menu-item" href="doctors.html">
+      <i class="fas fa-user-md"></i>
+      Doctors
+      <span class="menu-badge green" id="sbDoctors">0</span>
+    </a>
+
+    <a class="menu-item" href="appointments.html">
+      <i class="fas fa-calendar-check"></i>
+      Appointments
+      <span class="menu-badge orange" id="sbAppointments">0</span>
+    </a>
+
+    <div class="menu-section">Management</div>
+
+    <a class="menu-item" href="billing.html">
+      <i class="fas fa-file-invoice-dollar"></i>
+      Billing
+    </a>
+
+    <a class="menu-item" href="pharmacy.html">
+      <i class="fas fa-pills"></i>
+      Pharmacy
+    </a>
+
+    <a class="menu-item" href="laboratory.html">
+      <i class="fas fa-flask"></i>
+      Laboratory
+    </a>
+
+    <a class="menu-item" href="wards.html">
+      <i class="fas fa-bed"></i>
+      Wards
+    </a>
+
+    <a class="menu-item" href="reports.html">
+      <i class="fas fa-chart-bar"></i>
+      Reports
+    </a>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+      <div class="user-info">
+        <h4 id="sidebarName">Admin</h4>
+        <p id="sidebarRole">Administrator</p>
+      </div>
+      <div class="online-dot"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN CONTENT ========== -->
+<div class="main-content">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard Overview</h1>
+      <p id="topDate"></p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-date">
+        <i class="fas fa-clock" style="color:#1565c0"></i>
+        <span id="topTime"></span>
+      </div>
+      <div class="topbar-btn">
+        <i class="fas fa-bell"></i>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="topbar-btn">
+        <i class="fas fa-cog"></i>
+      </div>
+      <button class="btn-logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="dashboard-body">
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner">
+      <div class="welcome-text">
+        <h2>Good <span id="greeting"></span>, <span id="wbName"></span>! 👋</h2>
+        <p>Here is what is happening in your hospital today</p>
+      </div>
+      <div class="welcome-actions">
+        <button class="wb-btn white" onclick="window.location.href='patients.html'">
+          <i class="fas fa-user-plus"></i> Add Patient
+        </button>
+        <button class="wb-btn outline" onclick="window.location.href='reports.html'">
+          <i class="fas fa-chart-bar"></i> View Reports
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card blue" onclick="window.location.href='patients.html'">
+        <div class="stat-icon blue"><i class="fas fa-user-injured"></i></div>
+        <div class="stat-info">
+          <h3 id="totalPatients">0</h3>
+          <p>Total Patients</p>
+          <div class="stat-trend neutral"><i class="fas fa-circle"></i> Registered</div>
+        </div>
+      </div>
+      <div class="stat-card green" onclick="window.location.href='doctors.html'">
+        <div class="stat-icon green"><i class="fas fa-user-md"></i></div>
+        <div class="stat-info">
+          <h3 id="totalDoctors">0</h3>
+          <p>Active Doctors</p>
+          <div class="stat-trend up"><i class="fas fa-circle"></i> Available</div>
+        </div>
+      </div>
+      <div class="stat-card orange" onclick="window.location.href='appointments.html'">
+        <div class="stat-icon orange"><i class="fas fa-calendar-check"></i></div>
+        <div class="stat-info">
+          <h3 id="totalAppointments">0</h3>
+          <p>Appointments</p>
+          <div class="stat-trend up"><i class="fas fa-circle"></i> Total</div>
+        </div>
+      </div>
+      <div class="stat-card purple" onclick="window.location.href='billing.html'">
+        <div class="stat-icon purple"><i class="fas fa-file-invoice-dollar"></i></div>
+        <div class="stat-info">
+          <h3 id="totalRevenue">PKR 0</h3>
+          <p>Total Revenue</p>
+          <div class="stat-trend up"><i class="fas fa-circle"></i> Collected</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Middle Row -->
+    <div class="middle-row">
+
+      <!-- Recent Appointments -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-calendar-check"></i> Recent Appointments</h3>
+          <a class="view-all" href="appointments.html">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <table class="mini-table">
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Doctor</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recentAppointments">
+            <tr><td colspan="4" style="text-align:center;padding:20px;color:#aaa">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Quick Access -->
+      <div class="card">
+        <div class="card-header">
+          <h3><i class="fas fa-bolt"></i> Quick Access</h3>
+        </div>
+        <div class="quick-stats">
+          <a class="qs-item" href="patients.html">
+            <div class="qs-icon" style="background:linear-gradient(135deg,#1565c0,#1976d2)"><i class="fas fa-user-injured"></i></div>
+            <div class="qs-text"><h4>Patients</h4><p>Manage records</p></div>
+            <i class="fas fa-chevron-right qs-arrow"></i>
+          </a>
+          <a class="qs-item" href="doctors.html">
+            <div class="qs-icon" style="background:linear-gradient(135deg,#2e7d32,#388e3c)"><i class="fas fa-user-md"></i></div>
+            <div class="qs-text"><h4>Doctors</h4><p>Manage profiles</p></div>
+            <i class="fas fa-chevron-right qs-arrow"></i>
+          </a>
+          <a class="qs-item" href="appointments.html">
+            <div class="qs-icon" style="background:linear-gradient(135deg,#e65100,#f57c00)"><i class="fas fa-calendar-plus"></i></div>
+            <div class="qs-text"><h4>Book Appointment</h4><p>Schedule visit</p></div>
+            <i class="fas fa-chevron-right qs-arrow"></i>
+          </a>
+          <a class="qs-item" href="billing.html">
+            <div class="qs-icon" style="background:linear-gradient(135deg,#4a148c,#6a1b9a)"><i class="fas fa-file-invoice"></i></div>
+            <div class="qs-text"><h4>Create Bill</h4><p>Generate invoice</p></div>
+            <i class="fas fa-chevron-right qs-arrow"></i>
+          </a>
+          <a class="qs-item" href="reports.html">
+            <div class="qs-icon" style="background:linear-gradient(135deg,#006064,#0097a7)"><i class="fas fa-chart-bar"></i></div>
+            <div class="qs-text"><h4>Reports</h4><p>View analytics</p></div>
+            <i class="fas fa-chevron-right qs-arrow"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Modules -->
+    <div class="bottom-row">
+      <a class="module-card mc-red" href="pharmacy.html">
+        <div class="module-icon"><i class="fas fa-pills"></i></div>
+        <h3>Pharmacy</h3>
+        <p>Medicine inventory</p>
+      </a>
+      <a class="module-card mc-teal" href="laboratory.html">
+        <div class="module-icon"><i class="fas fa-flask"></i></div>
+        <h3>Laboratory</h3>
+        <p>Lab tests & reports</p>
+      </a>
+      <a class="module-card mc-pink" href="wards.html">
+        <div class="module-icon"><i class="fas fa-bed"></i></div>
+        <h3>Wards</h3>
+        <p>Bed management</p>
+      </a>
+      <a class="module-card mc-cyan" href="reports.html">
+        <div class="module-icon"><i class="fas fa-chart-line"></i></div>
+        <h3>Analytics</h3>
+        <p>Stats & insights</p>
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Auth check
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) window.location.href = '../index.html';
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarRole').textContent = user.role;
+  document.getElementById('wbName').textContent = user.name;
+
+  // Greeting
+  const hour = new Date().getHours();
+  document.getElementById('greeting').textContent =
+    hour < 12 ? 'Morning' : hour < 17 ? 'Afternoon' : 'Evening';
+
+  // Date & Time
+  function updateTime() {
+    const now = new Date();
+    document.getElementById('topDate').textContent = now.toDateString();
+    document.getElementById('topTime').textContent = now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  }
+  updateTime();
+  setInterval(updateTime, 1000);
+
+  // Load Stats
+  async function loadStats() {
+    try {
+      const [patients, doctors, appointments] = await Promise.all([
+        fetch('http://localhost:5000/api/patients/all').then(r => r.json()),
+        fetch('http://localhost:5000/api/doctors/all').then(r => r.json()),
+        fetch('http://localhost:5000/api/appointments/all').then(r => r.json())
+      ]);
+
+      document.getElementById('totalPatients').textContent = patients.length;
+      document.getElementById('totalDoctors').textContent = doctors.length;
+      document.getElementById('totalAppointments').textContent = appointments.length;
+
+      // Sidebar badges
+      document.getElementById('sbPatients').textContent = patients.length;
+      document.getElementById('sbDoctors').textContent = doctors.length;
+      document.getElementById('sbAppointments').textContent = appointments.length;
+
+      // Revenue
+      const bills = JSON.parse(localStorage.getItem('bills') || '[]');
+      const revenue = bills.filter(b => b.paymentStatus === 'Paid')
+        .reduce((sum, b) => sum + parseFloat(b.totalAmount || 0), 0);
+      document.getElementById('totalRevenue').textContent = 'PKR ' + revenue.toLocaleString();
+
+      // Recent Appointments
+      const colors = ['#1565c0','#2e7d32','#e65100','#4a148c','#006064'];
+      const recent = appointments.slice(-5).reverse();
+      const tbody = document.getElementById('recentAppointments');
+
+      if (recent.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:#aaa">No appointments yet</td></tr>';
+      } else {
+        tbody.innerHTML = recent.map((a, i) => `
+          <tr>
+            <td>
+              <div class="name-cell">
+                <div class="avatar-sm" style="background:${colors[i%5]}">${(a.patient?.name||'?')[0]}</div>
+                ${a.patient?.name || 'N/A'}
+              </div>
+            </td>
+            <td>${a.doctor?.name || 'N/A'}</td>
+            <td>${new Date(a.appointmentDate).toLocaleDateString()}</td>
+            <td><span class="badge-sm badge-${a.status.toLowerCase()}">${a.status}</span></td>
+          </tr>
+        `).join('');
+      }
+
+    } catch(e) {
+      console.log('Load error:', e);
+    }
+  }
+
+  loadStats();
+
+  function logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    window.location.href = '../index.html';
+  }
+</script>
+</body>
+</html>

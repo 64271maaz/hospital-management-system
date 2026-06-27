@@ -1,0 +1,81 @@
+### Test Server
+GET http://localhost:5000
+
+###  Add New Patient
+POST http://localhost:5000/api/patients/add
+Content-Type: application/json
+
+{
+  "name": "Ali Khan",
+  "age": 30,
+  "gender": "Male",
+  "phone": "03001234567",
+  "address": "Rawalpindi",
+  "bloodGroup": "A+",
+  "disease": "Fever"
+}
+
+### Get All Patients
+GET http://localhost:5000/api/patients/all
+
+### Add New Doctor
+POST http://localhost:5000/api/doctors/add
+Content-Type: application/json
+
+{
+  "name": "Dr. Ahmed Ali",
+  "specialization": "Cardiologist",
+  "phone": "03011234567",
+  "email": "ahmed@hospital.com",
+  "address": "Islamabad",
+  "experience": 10,
+  "department": "Cardiology",
+  "availableDays": ["Monday","Wednesday","Friday"],
+  "fee": 2000,
+  "status": "Active"
+}
+
+### Get All Doctors
+GET http://localhost:5000/api/doctors/all
+
+### Register User
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin User",
+  "email": "admin@hospital.com",
+  "password": "admin123",
+  "role": "Admin",
+  "phone": "03001111111"
+}
+
+### Login User
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@hospital.com",
+  "password": "admin123"
+}
+
+### Register User
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Admin User",
+  "email": "admin@hospital.com",
+  "password": "admin123",
+  "role": "Admin",
+  "phone": "03001111111"
+}
+
+### Login User
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@hospital.com",
+  "password": "admin123"
+}

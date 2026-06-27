@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hospital MS - Login</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      background: #0a1628;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .particles {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(100, 181, 246, 0.15);
+      animation: floatParticle linear infinite;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translateY(100vh) scale(0); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100px) scale(1); opacity: 0; }
+    }
+
+    .left-side {
+      flex: 1;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 40px;
+      background: linear-gradient(135deg, rgba(10,22,40,0.95) 0%, rgba(13,71,161,0.85) 100%);
+    }
+
+    .hospital-logo { position: relative; margin-bottom: 30px; }
+
+    .logo-ring {
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      border: 3px solid rgba(100,181,246,0.3);
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      animation: rotateSlow 8s linear infinite;
+    }
+
+    .logo-ring::before {
+      content: '';
+      position: absolute;
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      border: 3px solid transparent;
+      border-top-color: #64b5f6;
+      border-right-color: #64b5f6;
+      animation: rotateFast 2s linear infinite;
+    }
+
+    @keyframes rotateSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes rotateFast {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .logo-inner {
+      width: 90px; height: 90px;
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; color: white;
+      animation: rotateSlow 8s linear infinite reverse;
+      box-shadow: 0 0 30px rgba(100,181,246,0.4);
+    }
+
+    .left-side h1 {
+      color: white;
+      font-size: 34px;
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .left-side h1 span { color: #64b5f6; }
+
+    .left-side .tagline {
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 50px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .features-list { width: 100%; max-width: 340px; }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.3s;
+      opacity: 0;
+      animation: slideInLeft 0.5s ease forwards;
+    }
+
+    .feature-item:nth-child(1) { animation-delay: 0.3s; }
+    .feature-item:nth-child(2) { animation-delay: 0.5s; }
+    .feature-item:nth-child(3) { animation-delay: 0.7s; }
+    .feature-item:nth-child(4) { animation-delay: 0.9s; }
+    .feature-item:nth-child(5) { animation-delay: 1.1s; }
+
+    @keyframes slideInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .feature-item:hover {
+      background: rgba(100,181,246,0.1);
+      border-color: rgba(100,181,246,0.3);
+      transform: translateX(5px);
+    }
+
+    .feature-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      display: flex; align-items: center; justify-content: center;
+      color: #64b5f6;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 15px rgba(21,101,192,0.3);
+    }
+
+    .feature-text h4 { color: white; font-size: 14px; }
+    .feature-text p { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 2px; }
+
+    .stats-row {
+      display: flex;
+      gap: 20px;
+      margin-top: 40px;
+    }
+
+    .stat-bubble {
+      text-align: center;
+      padding: 15px 20px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .stat-bubble h3 { color: #64b5f6; font-size: 22px; }
+    .stat-bubble p { color: rgba(255,255,255,0.5); font-size: 11px; margin-top: 3px; }
+
+    .right-side {
+      width: 500px;
+      background: white;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 50px 45px;
+      animation: slideInRight 0.7s ease;
+      overflow-y: auto;
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(60px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .login-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e3f2fd;
+      color: #1565c0;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      color: #0d1b40;
+      font-size: 30px;
+      margin-bottom: 6px;
+    }
+
+    .sub-text {
+      color: #888;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .form-group { margin-bottom: 18px; position: relative; }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .input-wrapper { position: relative; }
+
+    .input-wrapper .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #b0bec5;
+      font-size: 16px;
+      transition: color 0.3s;
+    }
+
+    .input-wrapper input {
+      width: 100%;
+      padding: 13px 45px;
+      border: 2px solid #e8ecf0;
+      border-radius: 12px;
+      font-size: 14px;
+      background: #f8fafc;
+      transition: all 0.3s;
+      color: #333;
+    }
+
+    .input-wrapper input:focus {
+      outline: none;
+      border-color: #1565c0;
+      background: white;
+      box-shadow: 0 0 0 4px rgba(21,101,192,0.08);
+    }
+
+    .input-wrapper:focus-within .input-icon { color: #1565c0; }
+
+    .toggle-pass {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #b0bec5;
+      font-size: 16px;
+    }
+
+    .toggle-pass:hover { color: #1565c0; }
+
+    .form-options {
+      display: flex;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      color: #555;
+      cursor: pointer;
+    }
+
+    .remember-me input[type="checkbox"] { accent-color: #1565c0; }
+
+    .btn-login {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1565c0, #0d47a1);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-login::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+      transition: left 0.5s;
+    }
+
+    .btn-login:hover::after { left: 100%; }
+    .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(21,101,192,0.4); }
+    .btn-login:active { transform: translateY(0); }
+
+    .alert-box {
+      padding: 12px 15px;
+      border-radius: 10px;
+      font-size: 13px;
+      margin-top: 15px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .alert-error {
+      background: #ffebee;
+      color: #c62828;
+      border-left: 4px solid #c62828;
+    }
+
+    .divider {
+      text-align: center;
+      color: #ccc;
+      font-size: 12px;
+      margin: 20px 0;
+      position: relative;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 44%;
+      height: 1px;
+      background: #e8ecf0;
+    }
+
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .demo-section {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 15px;
+      border: 1px solid #e8ecf0;
+    }
+
+    .demo-section p {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .demo-btn {
+      width: 100%;
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: left;
+      color: #333;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .demo-btn:hover {
+      background: #e3f2fd;
+      border-color: #1565c0;
+      color: #1565c0;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 25px;
+      color: #aaa;
+      font-size: 11px;
+    }
+
+    @media (max-width: 900px) {
+      .left-side { display: none; }
+      .right-side { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<!-- LEFT SIDE -->
+<div class="left-side">
+  <div class="hospital-logo">
+    <div class="logo-ring">
+      <div class="logo-inner">
+        <i class="fas fa-hospital-alt"></i>
+      </div>
+    </div>
+  </div>
+
+  <h1>Hospital <span>MS</span></h1>
+  <p class="tagline">Smart Healthcare Management</p>
+
+  <div class="features-list">
+    <div class="feature-item">
+      <div class="feature-icon"><i class="fas fa-user-injured"></i></div>
+      <div class="feature-text">
+        <h4>Patient Management</h4>
+        <p>Complete patient records & history</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon"><i class="fas fa-user-md"></i></div>
+      <div class="feature-text">
+        <h4>Doctor Scheduling</h4>
+        <p>Manage doctors & appointments</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+      <div class="feature-text">
+        <h4>Billing & Invoices</h4>
+        <p>Generate & track payments</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon"><i class="fas fa-pills"></i></div>
+      <div class="feature-text">
+        <h4>Pharmacy & Lab</h4>
+        <p>Medicine stock & lab tests</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <div class="feature-icon"><i class="fas fa-chart-bar"></i></div>
+      <div class="feature-text">
+        <h4>Reports & Analytics</h4>
+        <p>Real-time stats & charts</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-bubble">
+      <h3>500+</h3>
+      <p>Patients</p>
+    </div>
+    <div class="stat-bubble">
+      <h3>50+</h3>
+      <p>Doctors</p>
+    </div>
+    <div class="stat-bubble">
+      <h3>24/7</h3>
+      <p>Support</p>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT SIDE -->
+<div class="right-side">
+
+  <div class="login-badge">
+    <i class="fas fa-shield-alt"></i> Secure Portal
+  </div>
+
+  <h2>Welcome Back! 👋</h2>
+  <p class="sub-text">Sign in to your hospital dashboard</p>
+
+  <div class="form-group">
+    <label>Email Address</label>
+    <div class="input-wrapper">
+      <i class="fas fa-envelope input-icon"></i>
+      <input type="email" id="loginEmail" placeholder="Enter your email">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Password</label>
+    <div class="input-wrapper">
+      <i class="fas fa-lock input-icon"></i>
+      <input type="password" id="loginPassword" placeholder="Enter your password">
+      <i class="fas fa-eye toggle-pass" onclick="togglePass('loginPassword', this)"></i>
+    </div>
+  </div>
+
+  <div class="form-options">
+    <label class="remember-me">
+      <input type="checkbox" id="rememberMe"> Remember me
+    </label>
+  </div>
+
+  <button class="btn-login" id="loginBtn" onclick="doLogin()">
+    <i class="fas fa-sign-in-alt"></i>
+    Sign In to Dashboard
+  </button>
+
+  <div class="alert-box alert-error" id="loginError">
+    <i class="fas fa-exclamation-circle"></i>
+    <span id="loginErrorText"></span>
+  </div>
+
+  <div class="divider">or try demo account</div>
+
+  <div class="demo-section">
+    <p><i class="fas fa-bolt"></i> Quick Login Demo</p>
+    <button class="demo-btn" onclick="fillDemo('admin2@hospital.com','admin123')">
+      <i class="fas fa-user-shield" style="color:#1565c0"></i>
+      <div>
+        <div style="font-weight:600">Admin Account</div>
+        <div style="font-size:11px;color:#888">admin2@hospital.com</div>
+      </div>
+    </button>
+  </div>
+
+  <div class="footer-note">
+    <i class="fas fa-lock"></i> 256-bit SSL encrypted connection
+  </div>
+
+</div>
+
+<script>
+  // Particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = Math.random() * 60 + 15;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      animation-duration:${Math.random()*15+10}s;
+      animation-delay:${Math.random()*10}s;
+    `;
+    container.appendChild(p);
+  }
+
+  // Toggle Password
+  function togglePass(id, icon) {
+    const input = document.getElementById(id);
+    if (input.type === 'password') {
+      input.type = 'text';
+      icon.classList.replace('fa-eye','fa-eye-slash');
+    } else {
+      input.type = 'password';
+      icon.classList.replace('fa-eye-slash','fa-eye');
+    }
+  }
+
+  // Fill Demo
+  function fillDemo(email, pass) {
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = pass;
+  }
+
+  // Login
+  async function doLogin() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const btn = document.getElementById('loginBtn');
+    const errBox = document.getElementById('loginError');
+
+    if (!email || !password) {
+      errBox.style.display = 'flex';
+      document.getElementById('loginErrorText').textContent = 'Please fill in all fields!';
+      return;
+    }
+
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+    btn.style.opacity = '0.8';
+    errBox.style.display = 'none';
+
+    try {
+      const res = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+        btn.innerHTML = '<i class="fas fa-check"></i> Success! Redirecting...';
+        btn.style.background = 'linear-gradient(135deg,#2e7d32,#1b5e20)';
+        setTimeout(() => {
+          window.location.href = 'dashboard.html';
+        }, 900);
+      } else {
+        btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Dashboard';
+        btn.style.opacity = '1';
+        errBox.style.display = 'flex';
+        document.getElementById('loginErrorText').textContent = data.message || 'Login failed!';
+      }
+    } catch(e) {
+      btn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In to Dashboard';
+      btn.style.opacity = '1';
+      errBox.style.display = 'flex';
+      document.getElementById('loginErrorText').textContent = 'Cannot connect to server!';
+    }
+  }
+
+  // Enter key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') doLogin();
+  });
+</script>
+</body>
+</html>

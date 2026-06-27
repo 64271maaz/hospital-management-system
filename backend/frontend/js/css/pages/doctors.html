@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Doctors - Hospital MS</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; display: flex; min-height: 100vh; }
+    .sidebar { width: 260px; min-height: 100vh; background: linear-gradient(180deg,#0a1628 0%,#0d2347 50%,#1a3a6b 100%); display: flex; flex-direction: column; position: fixed; left: 0; top: 0; z-index: 100; box-shadow: 4px 0 20px rgba(0,0,0,0.3); }
+    .sidebar-header { padding: 25px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 12px; }
+    .logo-box { width: 45px; height: 45px; background: linear-gradient(135deg,#1565c0,#0d47a1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; color: white; flex-shrink: 0; }
+    .logo-text h2 { color: white; font-size: 16px; font-weight: 700; }
+    .logo-text p { color: rgba(255,255,255,0.4); font-size: 11px; }
+    .sidebar-menu { padding: 15px 0; flex: 1; }
+    .menu-section { padding: 8px 20px 5px; color: rgba(255,255,255,0.3); font-size: 10px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-top: 8px; }
+    .menu-item { display: flex; align-items: center; gap: 12px; padding: 11px 20px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 13.5px; transition: all 0.25s; position: relative; margin: 1px 10px; border-radius: 10px; }
+    .menu-item:hover { background: rgba(255,255,255,0.08); color: white; }
+    .menu-item.active { background: linear-gradient(135deg,rgba(21,101,192,0.6),rgba(13,71,161,0.4)); color: white; }
+    .menu-item.active::before { content:''; position:absolute; left:-10px; top:50%; transform:translateY(-50%); width:4px; height:60%; background:#64b5f6; border-radius:0 3px 3px 0; }
+    .menu-item i { width: 22px; font-size: 15px; text-align: center; }
+    .sidebar-footer { padding: 15px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 12px; }
+    .user-avatar { width: 38px; height: 38px; background: linear-gradient(135deg,#1565c0,#0d47a1); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; flex-shrink: 0; }
+    .user-info h4 { color: white; font-size: 13px; font-weight: 600; }
+    .user-info p { color: rgba(255,255,255,0.4); font-size: 11px; }
+    .online-dot { width: 8px; height: 8px; background: #4caf50; border-radius: 50%; margin-left: auto; animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; }
+    .topbar { background: white; padding: 0 30px; height: 65px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 15px rgba(0,0,0,0.06); position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { color: #0d1b40; font-size: 19px; font-weight: 700; }
+    .topbar-left p { color: #888; font-size: 12px; }
+    .btn-logout { background: linear-gradient(135deg,#ffebee,#fce4ec); color: #c62828; border: 1px solid #ffcdd2; padding: 8px 16px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .btn-logout:hover { background: #c62828; color: white; }
+    .page-body { padding: 25px 30px; flex: 1; }
+
+    .mini-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 15px; margin-bottom: 22px; }
+    .ms-card { background: white; border-radius: 12px; padding: 16px 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .ms-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; color: white; flex-shrink: 0; }
+    .ms-icon.green { background: linear-gradient(135deg,#2e7d32,#388e3c); }
+    .ms-icon.blue { background: linear-gradient(135deg,#1565c0,#1976d2); }
+    .ms-icon.orange { background: linear-gradient(135deg,#e65100,#f57c00); }
+    .ms-icon.teal { background: linear-gradient(135deg,#004d40,#00695c); }
+    .ms-info h3 { font-size: 20px; font-weight: 700; color: #0d1b40; }
+    .ms-info p { font-size: 11px; color: #888; }
+
+    .controls { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 18px; display: flex; gap: 12px; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-wrap: wrap; }
+    .search-wrap { flex: 1; min-width: 200px; position: relative; }
+    .search-wrap i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 14px; }
+    .search-wrap input { width: 100%; padding: 10px 14px 10px 38px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; transition: all 0.2s; }
+    .search-wrap input:focus { outline: none; border-color: #2e7d32; background: white; }
+    .filter-select { padding: 10px 14px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; color: #333; }
+    .btn-add { background: linear-gradient(135deg,#2e7d32,#388e3c); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: all 0.2s; white-space: nowrap; }
+    .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(46,125,50,0.4); }
+
+    /* Doctor Cards Grid */
+    .doctors-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
+
+    .doctor-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .doctor-card:hover { transform: translateY(-6px); box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+
+    .card-top {
+      background: linear-gradient(135deg,#2e7d32,#1b5e20);
+      padding: 25px 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .status-pill {
+      position: absolute;
+      top: 12px; right: 12px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .status-pill.active { background: rgba(255,255,255,0.25); color: white; }
+    .status-pill.inactive { background: rgba(0,0,0,0.3); color: #ffcdd2; }
+
+    .doc-avatar {
+      width: 75px; height: 75px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; color: white;
+      margin: 0 auto 12px;
+      border: 3px solid rgba(255,255,255,0.3);
+    }
+
+    .doc-name { color: white; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+    .doc-spec { color: rgba(255,255,255,0.75); font-size: 12px; }
+
+    .card-body { padding: 18px 20px; }
+
+    .info-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 13px; color: #555; }
+    .info-row i { color: #2e7d32; width: 16px; font-size: 14px; flex-shrink: 0; }
+    .info-row strong { color: #0d1b40; }
+
+    .fee-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .card-actions { display: flex; gap: 8px; }
+    .btn-view { flex: 1; background: #e3f2fd; color: #1565c0; border: none; padding: 9px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+    .btn-edit { flex: 1; background: #e8f5e9; color: #2e7d32; border: none; padding: 9px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+    .btn-del { flex: 1; background: #ffebee; color: #c62828; border: none; padding: 9px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.2s; }
+    .btn-view:hover { background: #1565c0; color: white; }
+    .btn-edit:hover { background: #2e7d32; color: white; }
+    .btn-del:hover { background: #c62828; color: white; }
+
+    .empty-state { text-align: center; padding: 60px; color: #bbb; grid-column: 1/-1; }
+    .empty-state i { font-size: 55px; display: block; margin-bottom: 15px; }
+
+    /* Modal */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 1000; justify-content: center; align-items: center; padding: 20px; }
+    .overlay.show { display: flex; }
+    .modal { background: white; border-radius: 18px; width: 100%; max-width: 620px; max-height: 90vh; overflow-y: auto; animation: popIn 0.3s ease; }
+    @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .modal-header { padding: 22px 25px; border-bottom: 1px solid #f0f0f0; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 1; border-radius: 18px 18px 0 0; }
+    .modal-header h3 { color: #0d1b40; font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .modal-header h3 i { color: #2e7d32; }
+    .close-btn { background: #f0f4f8; border: none; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 16px; color: #666; display: flex; align-items: center; justify-content: center; }
+    .close-btn:hover { background: #ffebee; color: #c62828; }
+    .modal-body { padding: 22px 25px; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group select { width: 100%; padding: 11px 14px; border: 2px solid #e8ecf0; border-radius: 10px; font-size: 13px; background: #f8fafc; transition: all 0.2s; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #2e7d32; background: white; box-shadow: 0 0 0 4px rgba(46,125,50,0.08); }
+    .form-divider { font-size: 12px; font-weight: 700; color: #2e7d32; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #e8f5e9; display: flex; align-items: center; gap: 8px; }
+    .modal-footer { padding: 18px 25px; border-top: 1px solid #f0f0f0; display: flex; gap: 10px; justify-content: flex-end; }
+    .btn-cancel { background: #f0f4f8; color: #555; border: none; padding: 11px 22px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; }
+    .btn-save { background: linear-gradient(135deg,#2e7d32,#388e3c); color: white; border: none; padding: 11px 25px; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 7px; transition: all 0.2s; }
+    .view-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .view-item { background: #f8fafc; border-radius: 10px; padding: 12px 15px; }
+    .view-item .vi-label { font-size: 11px; color: #aaa; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600; }
+    .view-item .vi-value { font-size: 14px; color: #0d1b40; font-weight: 600; }
+    .days-wrap { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px; }
+    .day-chip { background: #e8f5e9; color: #2e7d32; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-box"><i class="fas fa-hospital-alt"></i></div>
+    <div class="logo-text"><h2>Hospital MS</h2><p>Management System</p></div>
+  </div>
+  <div class="sidebar-menu">
+    <div class="menu-section">Main Menu</div>
+    <a class="menu-item" href="dashboard.html"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a class="menu-item" href="patients.html"><i class="fas fa-user-injured"></i> Patients</a>
+    <a class="menu-item active" href="doctors.html"><i class="fas fa-user-md"></i> Doctors</a>
+    <a class="menu-item" href="appointments.html"><i class="fas fa-calendar-check"></i> Appointments</a>
+    <div class="menu-section">Management</div>
+    <a class="menu-item" href="billing.html"><i class="fas fa-file-invoice-dollar"></i> Billing</a>
+    <a class="menu-item" href="pharmacy.html"><i class="fas fa-pills"></i> Pharmacy</a>
+    <a class="menu-item" href="laboratory.html"><i class="fas fa-flask"></i> Laboratory</a>
+    <a class="menu-item" href="wards.html"><i class="fas fa-bed"></i> Wards</a>
+    <a class="menu-item" href="reports.html"><i class="fas fa-chart-bar"></i> Reports</a>
+  </div>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar"><i class="fas fa-user-shield"></i></div>
+      <div class="user-info"><h4 id="sidebarName">Admin</h4><p id="sidebarRole">Administrator</p></div>
+      <div class="online-dot"></div>
+    </div>
+  </div>
+</div>
+
+<div class="main-content">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1><i class="fas fa-user-md" style="color:#2e7d32"></i> Doctor Management</h1>
+      <p>Manage all doctor profiles</p>
+    </div>
+    <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+
+  <div class="page-body">
+    <div class="mini-stats">
+      <div class="ms-card"><div class="ms-icon green"><i class="fas fa-user-md"></i></div><div class="ms-info"><h3 id="statTotal">0</h3><p>Total Doctors</p></div></div>
+      <div class="ms-card"><div class="ms-icon blue"><i class="fas fa-check-circle"></i></div><div class="ms-info"><h3 id="statActive">0</h3><p>Active</p></div></div>
+      <div class="ms-card"><div class="ms-icon orange"><i class="fas fa-building"></i></div><div class="ms-info"><h3 id="statDepts">0</h3><p>Departments</p></div></div>
+      <div class="ms-card"><div class="ms-icon teal"><i class="fas fa-star"></i></div><div class="ms-info"><h3 id="statAvgExp">0</h3><p>Avg Exp (yrs)</p></div></div>
+    </div>
+
+    <div class="controls">
+      <div class="search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search by name, specialization, department..." oninput="filterDoctors()">
+      </div>
+      <select class="filter-select" id="statusFilter" onchange="filterDoctors()">
+        <option value="">All Status</option>
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+      <button class="btn-add" onclick="openAdd()"><i class="fas fa-plus"></i> Add Doctor</button>
+    </div>
+
+    <div class="doctors-grid" id="doctorsGrid">
+      <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>Loading...</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM MODAL -->
+<div class="overlay" id="formOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-user-md"></i> <span id="modalTitle">Add New Doctor</span></h3>
+      <button class="close-btn" onclick="closeModal('formOverlay')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId">
+      <div class="form-divider"><i class="fas fa-id-card"></i> Personal Info</div>
+      <div class="form-row">
+        <div class="form-group"><label>Full Name *</label><input type="text" id="fName" placeholder="Dr. Full Name"></div>
+        <div class="form-group"><label>Specialization *</label><input type="text" id="fSpec" placeholder="e.g. Cardiologist"></div>
+      </div>
+      <div class="form-divider"><i class="fas fa-building"></i> Professional Info</div>
+      <div class="form-row">
+        <div class="form-group"><label>Department *</label><input type="text" id="fDept" placeholder="e.g. Cardiology"></div>
+        <div class="form-group"><label>Experience (years)</label><input type="number" id="fExp" placeholder="Years of experience"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Consultation Fee (PKR) *</label><input type="number" id="fFee" placeholder="Fee amount"></div>
+        <div class="form-group"><label>Status</label>
+          <select id="fStatus"><option value="Active">Active</option><option value="Inactive">Inactive</option></select>
+        </div>
+      </div>
+      <div class="form-divider"><i class="fas fa-phone"></i> Contact Info</div>
+      <div class="form-row">
+        <div class="form-group"><label>Phone *</label><input type="text" id="fPhone" placeholder="03XXXXXXXXX"></div>
+        <div class="form-group"><label>Email *</label><input type="email" id="fEmail" placeholder="doctor@hospital.com"></div>
+      </div>
+      <div class="form-group"><label>Address</label><input type="text" id="fAddress" placeholder="Doctor address"></div>
+      <div class="form-divider"><i class="fas fa-calendar"></i> Available Days</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px">
+        <label id="days" style="display:contents">
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('formOverlay')">Cancel</button>
+      <button class="btn-save" onclick="saveDoctor()"><i class="fas fa-save"></i> Save Doctor</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW MODAL -->
+<div class="overlay" id="viewOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3><i class="fas fa-eye" style="color:#2e7d32"></i> Doctor Details</h3>
+      <button class="close-btn" onclick="closeModal('viewOverlay')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body" id="viewBody"></div>
+    <div class="modal-footer"><button class="btn-cancel" onclick="closeModal('viewOverlay')">Close</button></div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:5000/api/doctors';
+  let allDoctors = [];
+  const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+  const avatarColors = ['#2e7d32','#1565c0','#e65100','#4a148c','#880e4f','#004d40','#b71c1c'];
+
+  // Build day checkboxes
+  document.getElementById('days').outerHTML = `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px" id="daysWrap">
+    ${DAYS.map(d=>`<label style="display:flex;align-items:center;gap:5px;font-size:13px;cursor:pointer;background:#f8fafc;padding:6px 12px;border-radius:8px;border:2px solid #e8ecf0;transition:all 0.2s">
+      <input type="checkbox" class="dayCheck" value="${d}" style="accent-color:#2e7d32"> ${d.slice(0,3)}
+    </label>`).join('')}
+  </div>`;
+
+  const user = JSON.parse(localStorage.getItem('user'));
+  if (!user) window.location.href = '../index.html';
+  document.getElementById('sidebarName').textContent = user.name;
+  document.getElementById('sidebarRole').textContent = user.role;
+
+  async function loadDoctors() {
+    try {
+      const res = await fetch(`${API}/all`);
+      allDoctors = await res.json();
+      renderCards(allDoctors);
+      updateStats(allDoctors);
+    } catch(e) {
+      document.getElementById('doctorsGrid').innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-circle" style="color:#e53935"></i><p>Cannot connect to server!</p></div>';
+    }
+  }
+
+  function updateStats(list) {
+    document.getElementById('statTotal').textContent = list.length;
+    document.getElementById('statActive').textContent = list.filter(d=>d.status==='Active').length;
+    const depts = [...new Set(list.map(d=>d.department).filter(Boolean))].length;
+    document.getElementById('statDepts').textContent = depts;
+    const avgExp = list.length ? Math.round(list.reduce((s,d)=>s+parseInt(d.experience||0),0)/list.length) : 0;
+    document.getElementById('statAvgExp').textContent = avgExp;
+  }
+
+  function renderCards(list) {
+    const grid = document.getElementById('doctorsGrid');
+    if (!list.length) {
+      grid.innerHTML = '<div class="empty-state"><i class="fas fa-user-md"></i><p>No doctors found</p></div>';
+      return;
+    }
+    grid.innerHTML = list.map((d, i) => {
+      const color = avatarColors[i % avatarColors.length];
+      return `
+        <div class="doctor-card">
+          <div class="card-top" style="background:linear-gradient(135deg,${color},${color}cc)">
+            <span class="status-pill ${d.status==='Active'?'active':'inactive'}">${d.status}</span>
+            <div class="doc-avatar"><i class="fas fa-user-md"></i></div>
+            <div class="doc-name">${d.name}</div>
+            <div class="doc-spec">${d.specialization}</div>
+          </div>
+          <div class="card-body">
+            <div class="info-row"><i class="fas fa-building"></i> <span>${d.department}</span></div>
+            <div class="info-row"><i class="fas fa-phone"></i> <span>${d.phone}</span></div>
+            <div class="info-row"><i class="fas fa-envelope"></i> <span style="word-break:break-all">${d.email}</span></div>
+            <div class="info-row"><i class="fas fa-star"></i> <strong>${d.experience||0}</strong>&nbsp;years experience</div>
+            <div class="fee-badge"><i class="fas fa-money-bill"></i> PKR ${parseInt(d.fee).toLocaleString()} / visit</div>
+            <div class="card-actions">
+              <button class="btn-view" onclick="viewDoctor('${d._id}')"><i class="fas fa-eye"></i> View</button>
+              <button class="btn-edit" onclick="editDoctor('${d._id}')"><i class="fas fa-edit"></i> Edit</button>
+              <button class="btn-del" onclick="deleteDoctor('${d._id}')"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function filterDoctors() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const s = document.getElementById('statusFilter').value;
+    const filtered = allDoctors.filter(d =>
+      (!q || d.name.toLowerCase().includes(q) || d.specialization.toLowerCase().includes(q) || d.department.toLowerCase().includes(q)) &&
+      (!s || d.status === s)
+    );
+    renderCards(filtered);
+    updateStats(filtered);
+  }
+
+  function clearForm() {
+    ['fName','fSpec','fDept','fExp','fFee','fPhone','fEmail','fAddress'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('fStatus').value = 'Active';
+    document.querySelectorAll('.dayCheck').forEach(cb => cb.checked = false);
+  }
+
+  function openAdd() {
+    document.getElementById('modalTitle').textContent = 'Add New Doctor';
+    document.getElementById('editId').value = '';
+    clearForm();
+    document.getElementById('formOverlay').classList.add('show');
+  }
+
+  function editDoctor(id) {
+    const d = allDoctors.find(x => x._id === id);
+    document.getElementById('modalTitle').textContent = 'Edit Doctor';
+    document.getElementById('editId').value = d._id;
+    document.getElementById('fName').value = d.name;
+    document.getElementById('fSpec').value = d.specialization;
+    document.getElementById('fDept').value = d.department;
+    document.getElementById('fExp').value = d.experience || '';
+    document.getElementById('fFee').value = d.fee;
+    document.getElementById('fStatus').value = d.status;
+    document.getElementById('fPhone').value = d.phone;
+    document.getElementById('fEmail').value = d.email;
+    document.getElementById('fAddress').value = d.address || '';
+    document.querySelectorAll('.dayCheck').forEach(cb => { cb.checked = (d.availableDays||[]).includes(cb.value); });
+    document.getElementById('formOverlay').classList.add('show');
+  }
+
+  function viewDoctor(id) {
+    const d = allDoctors.find(x => x._id === id);
+    const i = allDoctors.indexOf(d);
+    const color = avatarColors[i % avatarColors.length];
+    const days = (d.availableDays||[]).map(day=>`<span class="day-chip">${day}</span>`).join('') || '—';
+    document.getElementById('viewBody').innerHTML = `
+      <div style="text-align:center;padding:20px;background:linear-gradient(135deg,${color},${color}cc);border-radius:12px;margin-bottom:20px">
+        <div style="width:70px;height:70px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;color:white;margin:0 auto 10px"><i class="fas fa-user-md"></i></div>
+        <h2 style="color:white;font-size:18px">${d.name}</h2>
+        <p style="color:rgba(255,255,255,0.8);font-size:13px">${d.specialization}</p>
+      </div>
+      <div class="view-grid">
+        <div class="view-item"><div class="vi-label">Department</div><div class="vi-value">${d.department}</div></div>
+        <div class="view-item"><div class="vi-label">Experience</div><div class="vi-value">${d.experience||0} years</div></div>
+        <div class="view-item"><div class="vi-label">Fee</div><div class="vi-value">PKR ${parseInt(d.fee).toLocaleString()}</div></div>
+        <div class="view-item"><div class="vi-label">Status</div><div class="vi-value">${d.status}</div></div>
+        <div class="view-item"><div class="vi-label">Phone</div><div class="vi-value">${d.phone}</div></div>
+        <div class="view-item"><div class="vi-label">Email</div><div class="vi-value">${d.email}</div></div>
+        <div class="view-item" style="grid-column:1/-1"><div class="vi-label">Available Days</div><div class="days-wrap">${days}</div></div>
+        <div class="view-item" style="grid-column:1/-1"><div class="vi-label">Address</div><div class="vi-value">${d.address||'—'}</div></div>
+      </div>`;
+    document.getElementById('viewOverlay').classList.add('show');
+  }
+
+  function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+  async function saveDoctor() {
+    const id = document.getElementById('editId').value;
+    const days = [...document.querySelectorAll('.dayCheck:checked')].map(cb => cb.value);
+    const data = {
+      name: document.getElementById('fName').value.trim(),
+      specialization: document.getElementById('fSpec').value.trim(),
+      department: document.getElementById('fDept').value.trim(),
+      experience: document.getElementById('fExp').value,
+      fee: document.getElementById('fFee').value,
+      status: document.getElementById('fStatus').value,
+      phone: document.getElementById('fPhone').value.trim(),
+      email: document.getElementById('fEmail').value.trim(),
+      address: document.getElementById('fAddress').value,
+      availableDays: days
+    };
+    if (!data.name || !data.specialization || !data.department || !data.fee || !data.phone || !data.email) {
+      alert('Please fill all required (*) fields!'); return;
+    }
+    try {
+      const url = id ? `${API}/${id}` : `${API}/add`;
+      const method = id ? 'PUT' : 'POST';
+      const res = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+      if (res.ok) { closeModal('formOverlay'); loadDoctors(); }
+      else { const d = await res.json(); alert(d.message || 'Error!'); }
+    } catch(e) { alert('Cannot connect to server!'); }
+  }
+
+  async function deleteDoctor(id) {
+    if (!confirm('Delete this doctor?')) return;
+    await fetch(`${API}/${id}`, { method: 'DELETE' });
+    loadDoctors();
+  }
+
+  function logout() { localStorage.clear(); window.location.href = '../index.html'; }
+  loadDoctors();
+</script>
+</body>
+</html>
